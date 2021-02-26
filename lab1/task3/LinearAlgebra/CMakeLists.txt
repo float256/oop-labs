@@ -1,0 +1,2 @@
+add_library(LinearAlgebraLibrary LinearAlgebra.h LinearAlgebra.cpp)
+set_target_properties(LinearAlgebraLibrary PROPERTIES LINKER_LANGUAGE CXX)

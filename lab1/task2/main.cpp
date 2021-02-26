@@ -2,6 +2,7 @@
 #include <string>
 #include <map>
 #include <limits>
+#include <algorithm>
 
 const char ALL_DIGITS_IN_ORDER[] = {
     '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
@@ -11,7 +12,8 @@ const char ALL_DIGITS_IN_ORDER[] = {
 
 const int MAX_RADIX = 36;
 
-char DigitToChar (int digit, bool &wasError) {
+char DigitToChar(int digit, bool &wasError)
+{
     wasError = (digit < 0) || (digit >= MAX_RADIX);
     if (wasError)
     {
@@ -20,7 +22,8 @@ char DigitToChar (int digit, bool &wasError) {
     return ALL_DIGITS_IN_ORDER[digit];
 }
 
-int DigitToInt (char digit, bool &wasError) {
+int DigitToInt(char digit, bool &wasError)
+{
     wasError = false;
     for (size_t i = 0; i < MAX_RADIX; i++)
     {
@@ -33,41 +36,64 @@ int DigitToInt (char digit, bool &wasError) {
     return -1;
 }
 
-bool IsOverflow(int initialNumber, int addedToEndDigit, int radix) {
-    int maxInt = std::numeric_limits<int>::max();
-    return (abs(initialNumber) >= (maxInt / radix)) && (addedToEndDigit > (maxInt % radix));
+bool IsOverflow(int initialNumber, int addedToEndDigit, int radix)
+{
+    const int MAX_INT = std::numeric_limits<int>::max();
+    const int MIN_INT = std::numeric_limits<int>::min();
+
+    if (initialNumber > 0)
+    {
+        return (initialNumber >= (MAX_INT / radix)) && (abs(addedToEndDigit) > (MAX_INT % radix));
+    }
+    else
+    {
+        return (initialNumber <= (MIN_INT / radix)) && (abs(addedToEndDigit) > abs(MIN_INT % radix));
+    }
 }
 
-bool IsDecimal(const std::string &numberInString) {
+bool IsDecimal(const std::string &numberInString)
+{
     bool isTransmittedNumberDecimal = true;
     for (char currSymbol : numberInString)
     {
         isTransmittedNumberDecimal = std::isdigit(currSymbol);
         if (!isTransmittedNumberDecimal)
         {
-            break;            
+            break;
         }
     }
-    
+
     return isTransmittedNumberDecimal;
 }
 
-bool IsCorrectRadix(int radix) {
+bool IsCorrectRadix(int radix)
+{
     return (radix > 1) && (radix <= MAX_RADIX);
 }
 
-int StringToInt(const std::string &str, int radix, bool &wasError) {
+int StringToInt(const std::string &str, int radix, bool &wasError)
+{
     int convertedNumber = 0;
     int startPosition = 0;
-    if ((str[0] == '-') || (str[0] == '+')) {
+    wasError = (str.length() == 0);
+    if (wasError)
+    {
+        return 0;
+    }
+
+    if ((str[0] == '-') || (str[0] == '+'))
+    {
         startPosition++;
     }
 
+    bool isNegative = (str[0] == '-');
     for (size_t i = startPosition; i < str.length(); i++)
     {
         int currDigit = DigitToInt(str[i], wasError);
+
         wasError = wasError || (currDigit > radix);
-        if (wasError) {
+        if (wasError)
+        {
             return 0;
         }
 
@@ -76,51 +102,73 @@ int StringToInt(const std::string &str, int radix, bool &wasError) {
         {
             return 0;
         }
-        
+
+        if (isNegative)
+        {
+            currDigit *= -1;
+        }
         convertedNumber = convertedNumber * radix + currDigit;
-    }
-    if (str[0] == '-')
-    {
-        convertedNumber *= -1;   
     }
     return convertedNumber;
 }
 
-std::string IntToString(int number, int radix, bool &wasError) {
+std::string IntToString(int number, int radix, bool &wasError)
+{
     wasError = !IsCorrectRadix(radix);
-    if (wasError) {
+    if (wasError)
+    {
         return "";
     }
-    
-    if (number == 0) {
+
+    if (number == 0)
+    {
         return "0";
     }
 
     std::string convertedNumber = "";
     bool isNegative = (number < 0);
 
-    number = abs(number);
-    while (number > 0)
+    while (number != 0)
     {
-        int currDigitInSelectedRadix = number % radix;
+        int currDigitInSelectedRadix = abs(number % radix);
         number = number / radix;
-        convertedNumber = DigitToChar(currDigitInSelectedRadix, wasError) + convertedNumber;
+        convertedNumber += DigitToChar(currDigitInSelectedRadix, wasError);
     }
-    
+
     if (isNegative)
     {
-        convertedNumber = "-" + convertedNumber;
+        convertedNumber += "-";
     }
+
+    std::reverse(convertedNumber.begin(), convertedNumber.end());
     return convertedNumber;
 }
 
-int main(int argc, char** argv) {
-    if ((argc != 4))
+std::string ConvertNumber(const std::string& number, int sourceNotation, int destinationNotation, bool &wasError)
+{
+    int numberForConverting = StringToInt(number, sourceNotation, wasError);
+    if (wasError)
+    {
+        return "";
+    }
+
+    std::string numberInDestinationNotation = IntToString(numberForConverting, destinationNotation, wasError);
+    if (wasError)
+    {
+        return "";
+    }
+    return numberInDestinationNotation;
+}
+
+int main(int argc, char **argv)
+{
+    if (argc != 4)
     {
         std::cout << "Incorrect number of arguments." << std::endl;
         return 1;
     }
-    if(!IsDecimal(argv[1]) || !IsDecimal(argv[2])) {
+    if (!IsDecimal(argv[1]) || !IsDecimal(argv[2]))
+    {
         std::cout << "Incorrect arguments." << std::endl;
         return 1;
     }
@@ -128,25 +176,23 @@ int main(int argc, char** argv) {
     bool wasError = false;
     int sourceNotation = StringToInt(argv[1], 10, wasError);
     wasError = (wasError || !IsCorrectRadix(sourceNotation));
-    if (wasError) {
+    if (wasError)
+    {
         std::cout << "Incorrect source notation." << std::endl;
         return 1;
     }
     int destinationNotation = StringToInt(argv[2], 10, wasError);
     wasError = (wasError || !IsCorrectRadix(destinationNotation));
-    if (wasError) {
+    if (wasError)
+    {
         std::cout << "Incorrect destination notation." << std::endl;
         return 1;
     }
-    int numberForConverting = StringToInt(argv[3], sourceNotation, wasError);
-    if (wasError) {
-        std::cout << "Error while parsing a number." << std::endl;
-        return 1;
-    }
 
-    std::string numberInDestinationNotation = IntToString(numberForConverting, destinationNotation, wasError);
-    if (wasError) {
-        std::cout << "Error while converting number in destination notation" << std::endl;
+    std::string numberInDestinationNotation = ConvertNumber(argv[3], sourceNotation, destinationNotation, wasError);
+    if (wasError)
+    {
+        std::cout << "Error while converting number." << std::endl;
         return 1;
     }
     std::cout << numberInDestinationNotation << std::endl;
