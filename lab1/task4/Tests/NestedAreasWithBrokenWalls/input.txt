@@ -1,0 +1,1 @@
+NestedAreasWithBrokenWalls/additionalFile.txt actualOutput.txt

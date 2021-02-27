@@ -1,0 +1,1 @@
+ManyStartPointsInOneArea/additionalFile.txt actualOutput.txt
