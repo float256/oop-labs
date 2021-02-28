@@ -23,13 +23,13 @@ void readMatrixFromFile(std::istream& inputStream, double (&matrix)[3][3])
 	}
 }
 
-void writeMatrixInFile(std::ostream& outputStream, double (&matrix)[3][3])
+void writeMatrixInStream(std::ostream& outputStream, double (&matrix)[3][3])
 {
 	for (size_t currRowIdx = 0; currRowIdx < 3; currRowIdx++)
 	{
 		for (size_t currColIdx = 0; currColIdx < 3; currColIdx++)
 		{
-			outputStream << std::setprecision(3) << matrix[currRowIdx][currColIdx] << " ";
+			outputStream << std::fixed << std::setprecision(3) << matrix[currRowIdx][currColIdx] << " ";
 		}
 		outputStream << std::endl;
 	}
@@ -37,7 +37,7 @@ void writeMatrixInFile(std::ostream& outputStream, double (&matrix)[3][3])
 
 int main(int argc, char** argv)
 {
-	if (argc != 3)
+	if (argc != 2)
 	{
 		std::cout << "Incorrect number of arguments." << std::endl;
 		return 1;
@@ -50,13 +50,6 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
-	std::ofstream outputFile(argv[2]);
-	if (!inputFile.is_open())
-	{
-		std::cout << "Could not create output file." << std::endl;
-		return 1;
-	}
-
 	try
 	{
 		double matrix[3][3];
@@ -64,7 +57,7 @@ int main(int argc, char** argv)
 
 		readMatrixFromFile(inputFile, matrix);
 		computeInvertMatrix(matrix, invertedMatrix);
-		writeMatrixInFile(outputFile, invertedMatrix);
+		writeMatrixInStream(std::cout, invertedMatrix);
 	}
 	catch (std::exception &exception)
 	{
