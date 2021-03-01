@@ -1,8 +1,22 @@
 #include "LinearAlgebra/LinearAlgebra.h"
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <stdexcept>
-#include <iomanip>
+
+bool isOnlySpaces(const std::string& inputString)
+{
+	bool isOnlySpacesInInputString = true;
+	for (auto& currChar : inputString)
+	{
+		isOnlySpacesInInputString = (isOnlySpacesInInputString && std::isspace(currChar));
+		if (!isOnlySpacesInInputString)
+		{
+			break;
+		}
+	}
+	return isOnlySpacesInInputString;
+}
 
 void readMatrixFromFile(std::istream& inputStream, double (&matrix)[3][3])
 {
@@ -19,6 +33,13 @@ void readMatrixFromFile(std::istream& inputStream, double (&matrix)[3][3])
 			}
 
 			matrix[currRowIdx][currColIdx] = currNumber;
+		}
+
+		std::string remainderStr;
+		std::getline(inputStream, remainderStr);
+		if (!isOnlySpaces(remainderStr))
+		{
+			throw std::invalid_argument("Extra characters at the end of the line.");
 		}
 	}
 }
@@ -59,7 +80,7 @@ int main(int argc, char** argv)
 		computeInvertMatrix(matrix, invertedMatrix);
 		writeMatrixInStream(std::cout, invertedMatrix);
 	}
-	catch (std::exception &exception)
+	catch (std::exception& exception)
 	{
 		std::cout << "Error: " << exception.what() << std::endl;
 		return 1;

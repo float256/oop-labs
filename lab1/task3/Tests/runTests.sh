@@ -43,10 +43,6 @@ do
         numberOfFailedTests=$(($numberOfFailedTests + 1))
     else
         echo -e "[Test '${currTestName}']: ${SUCCESSFUL_TEST_COLOR} SUCCESS ${NORMAL_TEST_COLOR}"
-        if [[ "$actualExitMessage" != "" ]]
-        then
-            echo "    Exit message: $actualExitMessage"
-        fi
         numberOfSuccessTests=$(($numberOfSuccessTests + 1))
     fi
 done
