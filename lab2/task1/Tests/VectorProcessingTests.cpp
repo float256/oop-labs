@@ -1,7 +1,7 @@
 #define CATCH_CONFIG_MAIN
 
 #include "../VectorProcessing/VectorProcessing.h"
-#include "catch.hpp"
+#include "../../../libs/catch2/catch.hpp"
 #include <limits>
 
 TEST_CASE("Reading vector from line is correct", "[ReadVectorFromLine]")
